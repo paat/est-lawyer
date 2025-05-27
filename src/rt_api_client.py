@@ -70,3 +70,64 @@ def fetch_acts_list(api_params: dict) -> dict | None:
 
     # Return None if there was an error
     return None
+
+def get_all_acts_for_query(initial_params: dict) -> list[dict]:
+    """
+    Retrieve all legal acts for a given query by handling pagination.
+
+    Parameters:
+    - initial_params (dict): The initial set of query parameters
+                             (e.g., {'dokument': 'seadus', 'kehtiv': 'YYYY-MM-DD', 'limiit': 100}).
+                             Do not include 'leht' (page number) in this parameter.
+
+    Returns:
+    - list[dict]: A list of all retrieved act metadata.
+    """
+    # Initialize list to store all acts
+    all_acts = []
+
+    # Start with the first page
+    current_page = 1
+
+    # Loop to handle pagination
+    while True:
+        # Create a copy of initial_params and add/update the 'leht' parameter
+        params_with_page = initial_params.copy()
+        params_with_page['leht'] = current_page
+
+        # Fetch acts for the current page
+        page_data = fetch_acts_list(params_with_page)
+
+        # If fetch failed, log the issue and return what we've got so far
+        if page_data is None:
+            logging.warning(f"No data returned for page {current_page}. Stopping pagination.")
+            break
+
+        # Extract the list of acts from the response
+        # Based on the API response structure, the acts are under the 'aktid' key
+        acts_on_page = page_data.get('aktid', [])
+
+        # If no acts are returned, we've reached the end
+        if not acts_on_page:
+            logging.info(f"No more results found after page {current_page}. Total acts retrieved: {len(all_acts)}")
+            break
+
+        # Add the acts from this page to our total list
+        all_acts.extend(acts_on_page)
+
+        # Log progress
+        logging.info(f"Page {current_page}: Retrieved {len(acts_on_page)} acts. Total: {len(all_acts)}")
+
+        # Increment the page number
+        current_page += 1
+
+        # Optional: Check if we've reached the last page
+        # This depends on the API's response structure
+        # For example, if the number of results is less than the limit, it's likely the last page
+        limit = params_with_page.get('limiit', 100)
+        if len(acts_on_page) < limit:
+            logging.info(f"Page {current_page - 1} returned fewer results than the limit, assuming last page.")
+            break
+
+    # Return all retrieved acts
+    return all_acts
