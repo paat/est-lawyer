@@ -131,3 +131,32 @@ def get_all_acts_for_query(initial_params: dict) -> list[dict]:
 
     # Return all retrieved acts
     return all_acts
+
+def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
+    """
+    Retrieve the full text of a legal act, either in plain text or XML format.
+
+    Parameters:
+    - act_metadata (dict): A dictionary representing a single act's metadata,
+                           as retrieved from get_all_acts_for_query().
+                           This dictionary should contain an ID or URL needed to fetch the full text.
+
+    Returns:
+    - tuple[str | None, str | None]: A tuple containing (plain_text, xml_text).
+                                     Returns (None, None) if full text retrieval is not yet implemented.
+
+    Note:
+    This function's implementation will depend on how full text is provided by Riigi Teataja.
+    """
+    # Ensure we have a delay between requests
+    time.sleep(DEFAULT_REQUEST_DELAY_SECONDS)
+
+    # Get the act ID or title for logging purposes
+    act_id = act_metadata.get('id', 'unknown')
+    act_title = act_metadata.get('pealkiri', 'untitled')
+
+    # Log that full text retrieval is not yet implemented
+    logging.info(f"Full text retrieval for act ID {act_id} ('{act_title}') not yet implemented")
+
+    # Return None for both plain text and XML text
+    return None, None
