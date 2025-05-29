@@ -30,20 +30,19 @@ def initialize_database():
     # Define the SQL statement to create the legal_documents table
     create_table_sql = '''
     CREATE TABLE IF NOT EXISTS legal_documents (
-        document_id TEXT PRIMARY KEY,
-        rt_unique_id TEXT UNIQUE,
-        title TEXT NOT NULL,
-        document_type TEXT NOT NULL,
-        text_content_plain TEXT,
-        text_content_xml TEXT,
-        publication_date TEXT,  -- Store dates as ISO format strings (YYYY-MM-DD)
-        entry_into_force_date TEXT,
-        repeal_date TEXT,
-        status TEXT NOT NULL CHECK(status IN ('VALID', 'EXPIRED', 'PENDING_VALIDITY', 'UNKNOWN')),
-        source_url TEXT UNIQUE,
-        api_response_json TEXT,
-        retrieved_at TEXT NOT NULL,  -- Store timestamps as ISO format strings (YYYY-MM-DD HH:MM:SS)
-        last_checked_at TEXT NOT NULL
+        rt_unique_id TEXT PRIMARY KEY,      -- From API 'id' field in act metadata
+        title TEXT NOT NULL,                -- From API 'pealkiri'
+        document_type TEXT NOT NULL,        -- From API 'liik' (e.g., 'SEADUS', 'MÄÄRUS')
+        text_content_plain TEXT,            -- Plain text or HTML content from get_full_document_text()
+        text_content_xml TEXT,              -- XML content from get_full_document_text()
+        publication_date TEXT,              -- From API 'avaldamiseKuupaev' (YYYY-MM-DD)
+        entry_into_force_date TEXT,         -- From API 'joustumiseKuupaev' (YYYY-MM-DD)
+        repeal_date TEXT,                   -- From API 'kehtivuseLoppKp' (YYYY-MM-DD, can be NULL)
+        status TEXT NOT NULL CHECK(status IN ('VALID', 'EXPIRED', 'PENDING_VALIDITY', 'UNKNOWN')), -- Derived
+        source_url TEXT UNIQUE,             -- Full URL to the document (e.g., HTML version)
+        api_response_json TEXT,             -- JSON string of the act's metadata from the API list response
+        retrieved_at TEXT NOT NULL,         -- ISO timestamp (YYYY-MM-DD HH:MM:SS) of when record was created
+        last_checked_at TEXT NOT NULL       -- ISO timestamp (YYYY-MM-DD HH:MM:SS) of when record was last checked/created
     )
     '''
 
@@ -55,7 +54,7 @@ def initialize_database():
     conn.close()
 
     # Print a success message
-    print(f"Database '{os.path.basename(database_path)}' initialized successfully with 'legal_documents' table in '{database_dir}'.")
+    print(f"Database '{os.path.basename(database_path)}' initialized successfully with 'legal_documents' table in '{database_dir}'. The table uses 'rt_unique_id' as the primary key.")
 
 if __name__ == "__main__":
     initialize_database()
