@@ -72,9 +72,75 @@ python src/db_setup.py
 
 This will create a `legal_documents` table in the specified database file.
 
-### Fetching Legal Acts
+### Downloading Legal Acts to the Database
 
-You can use the `rt_api_client.py` module to search for legal acts. Here's an example of how to fetch all acts of a specific type:
+You can use the command line to download legal acts from the Riigi Teataja API and store them in your local database. The `data_retriever.py` script provides a convenient way to do this with various options.
+
+#### Basic Usage
+
+To download all laws (seadus) and store them in the database:
+
+```bash
+python src/data_retriever.py
+```
+
+#### Searching for Specific Document Types
+
+You can specify the type of document to search for using the `--search-document-type` parameter:
+
+```bash
+# Download all regulations (määrus)
+python src/data_retriever.py --search-document-type "määrus"
+```
+
+#### Searching for Documents Valid on a Specific Date
+
+You can search for documents that are valid on a specific date using the `--search-date` parameter:
+
+```bash
+# Download all laws valid on January 1, 2024
+python src/data_retriever.py --search-date "2024-01-01"
+```
+
+#### Limiting the Number of Acts
+
+For testing purposes, you can limit the total number of acts to process:
+
+```bash
+# Download only 50 laws
+python src/data_retriever.py --limit-acts 50
+```
+
+#### Limiting the Number of API Pages
+
+You can also limit the number of pages fetched from the API:
+
+```bash
+# Download laws but only fetch 2 pages of results
+python src/data_retriever.py --page-limit 2
+```
+
+#### Setting Items per Page
+
+You can control how many items are requested per page from the API:
+
+```bash
+# Download laws with 50 items per page instead of the default 100
+python src/data_retriever.py --items-per-page 50
+```
+
+#### Example: Combining Multiple Options
+
+You can combine multiple options to customize your download:
+
+```bash
+# Download up to 100 regulations valid on January 1, 2024, with 25 items per page
+python src/data_retriever.py --search-document-type "määrus" --search-date "2024-01-01" --limit-acts 100 --items-per-page 25
+```
+
+### Fetching Legal Acts Programmatically
+
+If you prefer to use the API client programmatically, you can use the `rt_api_client.py` module to search for legal acts. Here's an example of how to fetch all acts of a specific type:
 
 ```python
 from src.rt_api_client import get_all_acts_for_query
@@ -94,7 +160,7 @@ print(f"Total acts retrieved: {len(all_acts)}")
 
 ### Retrieving Document Text
 
-The `get_full_document_text` function is currently a placeholder and logs that the functionality is not yet implemented. You can extend this function to retrieve the full text of legal documents from the Riigi Teataja API.
+The `get_full_document_text` function retrieves the full text of legal documents from the Riigi Teataja API. It attempts to fetch both plain text and XML content for each document.
 
 ## Testing
 
