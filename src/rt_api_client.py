@@ -71,7 +71,7 @@ def fetch_acts_list(api_params: dict) -> dict | None:
     # Return None if there was an error
     return None
 
-def get_all_acts_for_query(initial_params: dict) -> list[dict]:
+def get_all_acts_for_query(initial_params: dict, max_pages: int | None = None) -> list[dict]:
     """
     Retrieve all legal acts for a given query by handling pagination.
 
@@ -79,6 +79,7 @@ def get_all_acts_for_query(initial_params: dict) -> list[dict]:
     - initial_params (dict): The initial set of query parameters
                              (e.g., {'dokument': 'seadus', 'kehtiv': 'YYYY-MM-DD', 'limiit': 100}).
                              Do not include 'leht' (page number) in this parameter.
+    - max_pages (int | None): Optional. Maximum number of pages to fetch. If None, fetch all pages.
 
     Returns:
     - list[dict]: A list of all retrieved act metadata.
@@ -91,6 +92,11 @@ def get_all_acts_for_query(initial_params: dict) -> list[dict]:
 
     # Loop to handle pagination
     while True:
+        # Check if we've reached the max_pages limit
+        if max_pages is not None and current_page > max_pages:
+            logging.info(f"Reached max_pages limit ({max_pages}). Stopping pagination.")
+            break
+
         # Create a copy of initial_params and add/update the 'leht' parameter
         params_with_page = initial_params.copy()
         params_with_page['leht'] = current_page

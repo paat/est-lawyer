@@ -44,8 +44,8 @@ def main():
         'dokument': 'seadus'
     }
 
-    # Fetch all acts for the query
-    all_acts = get_all_acts_for_query(initial_params)
+    # Fetch all acts for the query, but limit to 2 pages for testing
+    all_acts = get_all_acts_for_query(initial_params, max_pages=2)
 
     # Print result
     if all_acts:
