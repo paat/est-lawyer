@@ -100,7 +100,7 @@ def main():
         cursor = conn.cursor()
 
         # Fetch all acts for the query
-        all_acts = get_all_acts_for_query(initial_params)
+        all_acts = get_all_acts_for_query(initial_params, args.page_limit)
 
         # Process acts with pagination limit if specified
         if args.page_limit:

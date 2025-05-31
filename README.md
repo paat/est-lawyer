@@ -136,6 +136,8 @@ You can combine multiple options to customize your download:
 ```bash
 # Download up to 100 regulations valid on January 1, 2024, with 25 items per page
 python src/data_retriever.py --search-document-type "määrus" --search-date "2024-01-01" --limit-acts 100 --items-per-page 25
+# Page limit example
+python src/data_retriever.py --search-document-type "seadus" --search-date "2025-05-31" --page-limit 2 --items-per-page 25
 ```
 
 ### Fetching Legal Acts Programmatically
