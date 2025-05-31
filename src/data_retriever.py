@@ -117,7 +117,7 @@ def main():
 
         for act_metadata in all_acts:
             total_processed += 1
-            act_id = act_metadata.get('id')
+            act_id = act_metadata.get('globaalID')
             act_title = act_metadata.get('pealkiri', 'untitled')
 
             logging.info(f"Processing act {total_processed}/{len(all_acts)}: ID={act_id}, Title='{act_title}'")
@@ -127,7 +127,7 @@ def main():
                 plain_text, xml_text = get_full_document_text(act_metadata)
 
                 # Extract fields
-                rt_unique_id = act_metadata.get('id')
+                rt_unique_id = act_metadata.get('globaalID')
                 title = act_metadata.get('pealkiri', '')
                 document_type = act_metadata.get('liik', '')
                 publication_date = act_metadata.get('avaldamiseKuupaev')

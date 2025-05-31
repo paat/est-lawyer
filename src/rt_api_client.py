@@ -155,7 +155,7 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
     time.sleep(DEFAULT_REQUEST_DELAY_SECONDS)
 
     # Get the act ID or title for logging purposes
-    act_id = act_metadata.get('id', 'unknown')
+    act_id = act_metadata.get('globaalID', 'unknown')
     act_title = act_metadata.get('pealkiri', 'untitled')
 
     # Load the document base URL from environment variables
