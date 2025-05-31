@@ -147,7 +147,9 @@ def main():
                 source_url = f"{document_base_url}{html_url}" if html_url.startswith('/') else html_url
 
                 # Prepare data for insertion
+                full_text_id = act_metadata.get('terviktekstID')
                 data = (
+                    full_text_id,
                     rt_unique_id,
                     title,
                     document_type,
@@ -166,10 +168,10 @@ def main():
                 # Insert into database
                 cursor.execute('''
                     INSERT OR IGNORE INTO legal_documents (
-                        rt_unique_id, title, document_type, text_content_plain, text_content_xml,
+                        full_text_id, rt_unique_id, title, document_type, text_content_plain, text_content_xml,
                         publication_date, entry_into_force_date, repeal_date, status, source_url,
                         api_response_json, retrieved_at, last_checked_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', data)
 
                 # Check if insertion was successful (row count)

@@ -30,7 +30,8 @@ def initialize_database():
     # Define the SQL statement to create the legal_documents table
     create_table_sql = '''
     CREATE TABLE IF NOT EXISTS legal_documents (
-        rt_unique_id TEXT PRIMARY KEY,      -- From API 'id' field in act metadata
+        full_text_id INTEGER PRIMARY KEY,      -- From API 'terviktekstID'
+        rt_unique_id TEXT UNIQUE NOT NULL,      -- From API 'globaalID'
         title TEXT NOT NULL,                -- From API 'pealkiri'
         document_type TEXT NOT NULL,        -- From API 'liik' (e.g., 'SEADUS', 'MÄÄRUS')
         text_content_plain TEXT,            -- Plain text or HTML content from get_full_document_text()
@@ -46,7 +47,8 @@ def initialize_database():
     )
     '''
 
-    # Execute the SQL statement
+    # Drop the existing table (if any) and recreate it to ensure the new schema
+    cursor.execute("DROP TABLE IF EXISTS legal_documents")
     cursor.execute(create_table_sql)
 
     # Commit the changes and close the connection
