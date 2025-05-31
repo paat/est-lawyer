@@ -222,14 +222,20 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
         except Exception as e:
             logging.error(f"Unexpected error fetching HTML content for act ID {act_id}: {str(e)}")
 
-    # Try to fetch XML content (from dokumentXML URL)
-    try:
-        xml_url = act_metadata.get('dokumentXML')
+    # Try to fetch XML content (from dokumentXML URL, then from 'url' field)
+    xml_url = act_metadata.get('dokumentXML')
+    if not xml_url:
+        # Fall back to the 'url' field if present
+        xml_url = act_metadata.get('url')
         if xml_url:
-            # Construct full URL if it's relative
-            full_xml_url = xml_url if xml_url.startswith('http') else f"{document_base_url}{xml_url}"
-            logging.info(f"Attempting to fetch XML content from: {full_xml_url}")
+            logging.info(f"Using fallback 'url' field for XML content for act ID {act_id}")
 
+    if xml_url:
+        # Construct full URL if it's relative
+        full_xml_url = xml_url if xml_url.startswith('http') else f"{document_base_url}{xml_url}"
+        logging.info(f"Attempting to fetch XML content from: {full_xml_url}")
+
+        try:
             # Make the request
             response = requests.get(full_xml_url, headers=headers, timeout=30)
             response.raise_for_status()
@@ -237,12 +243,12 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
             # Store the content
             xml_content = response.text
             logging.info(f"Successfully retrieved XML content for act ID {act_id}")
-        else:
-            logging.info(f"No XML URL (dokumentXML) found for act ID {act_id}")
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching XML content for act ID {act_id}: {str(e)}")
-    except Exception as e:
-        logging.error(f"Unexpected error fetching XML content for act ID {act_id}: {str(e)}")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error fetching XML content for act ID {act_id}: {str(e)}")
+        except Exception as e:
+            logging.error(f"Unexpected error fetching XML content for act ID {act_id}: {str(e)}")
+    else:
+        logging.info(f"No XML URL found for act ID {act_id}")
 
     # Log the result of the retrieval
     text_type = "HTML" if plain_text_content and "html" in plain_text_content.lower() else "Plain text"

@@ -99,8 +99,8 @@ def main():
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
 
-        # Fetch all acts for the query
-        all_acts = get_all_acts_for_query(initial_params)
+        # Fetch all acts for the query, with optional page limit
+        all_acts = get_all_acts_for_query(initial_params, max_pages=args.page_limit)
 
         # Process acts with pagination limit if specified
         if args.page_limit:
