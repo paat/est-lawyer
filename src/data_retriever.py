@@ -177,7 +177,7 @@ def main():
                 # Check if insertion was successful (row count)
                 if cursor.rowcount > 0:
                     total_inserted += 1
-                    logging.info(f"Inserted act ID={act_id}")
+                    logging.info(f"Inserted act full_text_id={full_text_id} rt_unique_id={rt_unique_id}")
                 else:
                     total_ignored += 1
                     logging.info(f"Ignored act ID={act_id} (already exists)")

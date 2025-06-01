@@ -40,7 +40,7 @@ def initialize_database():
         entry_into_force_date TEXT,         -- From API 'joustumiseKuupaev' (YYYY-MM-DD)
         repeal_date TEXT,                   -- From API 'kehtivuseLoppKp' (YYYY-MM-DD, can be NULL)
         status TEXT NOT NULL CHECK(status IN ('VALID', 'EXPIRED', 'PENDING_VALIDITY', 'UNKNOWN')), -- Derived
-        source_url TEXT UNIQUE,             -- Full URL to the document (e.g., HTML version)
+        source_url TEXT,                    -- Full URL to the document (e.g., HTML version)
         api_response_json TEXT,             -- JSON string of the act's metadata from the API list response
         retrieved_at TEXT NOT NULL,         -- ISO timestamp (YYYY-MM-DD HH:MM:SS) of when record was created
         last_checked_at TEXT NOT NULL       -- ISO timestamp (YYYY-MM-DD HH:MM:SS) of when record was last checked/created
