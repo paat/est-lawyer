@@ -70,7 +70,7 @@ def main():
     parser.add_argument("--search-date", type=str, default=None,
                         help="Optional. A specific date for which to find valid documents (YYYY-MM-DD).")
     parser.add_argument("--limit-acts", type=int, default=None,
-                        help="Optional. Limit the total number of acts to process (for testing purposes).")
+                        help="Optional. Limit the total number of acts to process and the number of pages fetched (for testing purposes).")
     parser.add_argument("--page-limit", type=int, default=None,
                         help="Optional. Limit the number of pages fetched from the API for each query (for testing purposes).")
     parser.add_argument("--items-per-page", type=int, default=100,
@@ -99,16 +99,20 @@ def main():
         conn = sqlite3.connect(database_path)
         cursor = conn.cursor()
 
-        # Fetch all acts for the query, with optional page limit
-        all_acts = get_all_acts_for_query(initial_params, max_pages=args.page_limit)
-
-        # Process acts with pagination limit if specified
-        if args.page_limit:
-            all_acts = all_acts[:args.page_limit * args.items_per_page]
-
-        # Limit acts if specified
-        if args.limit_acts and args.limit_acts < len(all_acts):
+        # Calculate max_pages based on limit_acts if specified
+        if args.limit_acts:
+            # Calculate the number of pages needed for the limit
+            max_pages = (args.limit_acts + args.items_per_page - 1) // args.items_per_page
+            # Fetch acts with the calculated page limit
+            all_acts = get_all_acts_for_query(initial_params, max_pages=max_pages)
+            # Apply the limit to the acts
             all_acts = all_acts[:args.limit_acts]
+        else:
+            # Fetch all acts for the query, with optional page limit
+            all_acts = get_all_acts_for_query(initial_params, max_pages=args.page_limit)
+            # Process acts with pagination limit if specified
+            if args.page_limit:
+                all_acts = all_acts[:args.page_limit * args.items_per_page]
 
         # Process each act
         total_processed = 0
