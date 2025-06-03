@@ -47,8 +47,7 @@ def initialize_database():
     )
     '''
 
-    # Drop the existing table (if any) and recreate it to ensure the new schema
-    cursor.execute("DROP TABLE IF EXISTS legal_documents")
+    # Create the table if it doesn't exist
     cursor.execute(create_table_sql)
 
     # Commit the changes and close the connection
@@ -56,7 +55,7 @@ def initialize_database():
     conn.close()
 
     # Print a success message
-    print(f"Database '{os.path.basename(database_path)}' initialized successfully with 'legal_documents' table in '{database_dir}'. The table uses 'rt_unique_id' as the primary key.")
+    print(f"Database '{os.path.basename(database_path)}' in directory '{database_dir}' checked/initialized. Table 'legal_documents' uses 'full_text_id' as PRIMARY KEY.")
 
 if __name__ == "__main__":
     initialize_database()
