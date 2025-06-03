@@ -14,9 +14,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 # Import the function to be tested
-from rt_api_client import get_full_document_text
-
-# No longer needed - using patch.dict instead
+from src.rt_api_client import get_full_document_text
 
 class TestGetFullDocumentText(unittest.TestCase):
     """Test suite for the get_full_document_text function."""
@@ -38,10 +36,10 @@ class TestGetFullDocumentText(unittest.TestCase):
         }
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
-    @patch('rt_api_client.os.path.isabs', return_value=True)
-    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
+    @patch('src.rt_api_client.os.path.isabs', return_value=True)
+    @patch('src.rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
     def test_fetch_plain_text_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of plain text content."""
         # Configure the mock to return a successful response with text content
@@ -75,10 +73,10 @@ class TestGetFullDocumentText(unittest.TestCase):
         self.assertEqual(xml_text, "This is XML content")
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
-    @patch('rt_api_client.os.path.isabs', return_value=True)
-    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
+    @patch('src.rt_api_client.os.path.isabs', return_value=True)
+    @patch('src.rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
     def test_fetch_html_fallback_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of HTML content when plain text is not available."""
         # Configure the mock to fail for plain text but succeed for HTML
@@ -125,10 +123,10 @@ class TestGetFullDocumentText(unittest.TestCase):
         self.assertEqual(xml_text, "<html>This is HTML content</html>")
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
-    @patch('rt_api_client.os.path.isabs', return_value=True)
-    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
+    @patch('src.rt_api_client.os.path.isabs', return_value=True)
+    @patch('src.rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
     def test_fetch_xml_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of XML content."""
         # Configure the mock to return a successful response with XML content
@@ -156,8 +154,8 @@ class TestGetFullDocumentText(unittest.TestCase):
         self.assertEqual(xml_text, "<xml>This is XML content</xml>")
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
     def test_all_urls_missing(self, mock_get, mock_sleep):
         """Test behavior when all document URLs are missing."""
         # Call the function with an act that has no document URLs
@@ -174,8 +172,8 @@ class TestGetFullDocumentText(unittest.TestCase):
         self.assertIsNone(xml_text)
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
     def test_request_exception_handling(self, mock_get, mock_sleep):
         """Test handling of request exceptions."""
         # Configure the mock to raise a RequestException
@@ -189,9 +187,9 @@ class TestGetFullDocumentText(unittest.TestCase):
         self.assertIsNone(xml_text)
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
-    @patch('rt_api_client.time.sleep')
-    @patch('rt_api_client.requests.get')
-    @patch('rt_api_client.os.path.isabs', return_value=False)  # Force it to use HTTP requests
+    @patch('src.rt_api_client.time.sleep')
+    @patch('src.rt_api_client.requests.get')
+    @patch('src.rt_api_client.os.path.isabs', return_value=False)  # Force it to use HTTP requests
     def test_absolute_urls(self, mock_isabs, mock_get, mock_sleep):
         """Test handling of absolute URLs."""
         # Create an act with absolute URLs

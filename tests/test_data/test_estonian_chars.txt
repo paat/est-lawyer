@@ -1,0 +1,1 @@
+This is a test file with Estonian special characters: ä ö ü õ š ž
