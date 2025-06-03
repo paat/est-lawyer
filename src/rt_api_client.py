@@ -178,17 +178,26 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
     try:
         text_url = act_metadata.get('dokumentTekst')
         if text_url:
-            # Construct full URL if it's relative
-            full_text_url = text_url if text_url.startswith('http') else f"{document_base_url}{text_url}"
-            logging.info(f"Attempting to fetch plain text from: {full_text_url}")
+            # Handle local file paths
+            if os.path.isabs(text_url) and not text_url.startswith('http'):
+                if os.path.exists(text_url):
+                    with open(text_url, 'r', encoding='utf-8', errors='replace') as f:
+                        plain_text_content = f.read()
+                    logging.info(f"Successfully read plain text from local file: {text_url}")
+                else:
+                    logging.warning(f"Local file not found: {text_url}")
+            else:
+                # Handle remote URLs
+                full_text_url = text_url if text_url.startswith('http') else f"{document_base_url}{text_url}"
+                logging.info(f"Attempting to fetch plain text from: {full_text_url}")
 
-            # Make the request
-            response = requests.get(full_text_url, headers=headers, timeout=30)
-            response.raise_for_status()
+                # Make the request
+                response = requests.get(full_text_url, headers=headers, timeout=30)
+                response.raise_for_status()
 
-            # Store the content
-            plain_text_content = response.text
-            logging.info(f"Successfully retrieved plain text for act ID {act_id}")
+                # Store the content with explicit UTF-8 decoding
+                plain_text_content = response.content.decode('utf-8', errors='replace')
+                logging.info(f"Successfully retrieved and UTF-8 decoded plain text for act ID {act_id}")
         else:
             logging.info(f"No plain text URL (dokumentTekst) found for act ID {act_id}")
     except requests.exceptions.RequestException as e:
@@ -201,20 +210,29 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
         try:
             html_url = act_metadata.get('dokumentHtml')
             if html_url:
-                # Construct full URL if it's relative
-                full_html_url = html_url if html_url.startswith('http') else f"{document_base_url}{html_url}"
-                logging.info(f"Attempting to fetch HTML content from: {full_html_url}")
-
-                # Make the request
-                response = requests.get(full_html_url, headers=headers, timeout=30)
-
-                # Check if we got a successful response (status code < 400)
-                if response.status_code < 400:
-                    # Store the content
-                    plain_text_content = response.text
-                    logging.info(f"Successfully retrieved HTML content for act ID {act_id}")
+                # Handle local file paths
+                if os.path.isabs(html_url) and not html_url.startswith('http'):
+                    if os.path.exists(html_url):
+                        with open(html_url, 'r', encoding='utf-8', errors='replace') as f:
+                            plain_text_content = f.read()
+                        logging.info(f"Successfully read HTML content from local file: {html_url}")
+                    else:
+                        logging.warning(f"Local file not found: {html_url}")
                 else:
-                    logging.warning(f"HTML content retrieval failed with status code {response.status_code} for act ID {act_id}")
+                    # Handle remote URLs
+                    full_html_url = html_url if html_url.startswith('http') else f"{document_base_url}{html_url}"
+                    logging.info(f"Attempting to fetch HTML content from: {full_html_url}")
+
+                    # Make the request
+                    response = requests.get(full_html_url, headers=headers, timeout=30)
+
+                    # Check if we got a successful response (status code < 400)
+                    if response.status_code < 400:
+                        # Store the content with explicit UTF-8 decoding
+                        plain_text_content = response.content.decode('utf-8', errors='replace')
+                        logging.info(f"Successfully retrieved and UTF-8 decoded HTML content for act ID {act_id}")
+                    else:
+                        logging.warning(f"HTML content retrieval failed with status code {response.status_code} for act ID {act_id}")
             else:
                 logging.info(f"No HTML URL (dokumentHtml) found for act ID {act_id}")
         except requests.exceptions.RequestException as e:
@@ -231,22 +249,31 @@ def get_full_document_text(act_metadata: dict) -> tuple[str | None, str | None]:
             logging.info(f"Using fallback 'url' field for XML content for act ID {act_id}")
 
     if xml_url:
-        # Construct full URL if it's relative
-        full_xml_url = xml_url if xml_url.startswith('http') else f"{document_base_url}{xml_url}"
-        logging.info(f"Attempting to fetch XML content from: {full_xml_url}")
+        # Handle local file paths
+        if os.path.isabs(xml_url) and not xml_url.startswith('http'):
+            if os.path.exists(xml_url):
+                with open(xml_url, 'r', encoding='utf-8', errors='replace') as f:
+                    xml_content = f.read()
+                logging.info(f"Successfully read XML content from local file: {xml_url}")
+            else:
+                logging.warning(f"Local file not found: {xml_url}")
+        else:
+            # Handle remote URLs
+            full_xml_url = xml_url if xml_url.startswith('http') else f"{document_base_url}{xml_url}"
+            logging.info(f"Attempting to fetch XML content from: {full_xml_url}")
 
-        try:
-            # Make the request
-            response = requests.get(full_xml_url, headers=headers, timeout=30)
-            response.raise_for_status()
+            try:
+                # Make the request
+                response = requests.get(full_xml_url, headers=headers, timeout=30)
+                response.raise_for_status()
 
-            # Store the content
-            xml_content = response.text
-            logging.info(f"Successfully retrieved XML content for act ID {act_id}")
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error fetching XML content for act ID {act_id}: {str(e)}")
-        except Exception as e:
-            logging.error(f"Unexpected error fetching XML content for act ID {act_id}: {str(e)}")
+                # Store the content with explicit UTF-8 decoding
+                xml_content = response.content.decode('utf-8', errors='replace')
+                logging.info(f"Successfully retrieved and UTF-8 decoded XML content for act ID {act_id}")
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Error fetching XML content for act ID {act_id}: {str(e)}")
+            except Exception as e:
+                logging.error(f"Unexpected error fetching XML content for act ID {act_id}: {str(e)}")
     else:
         logging.info(f"No XML URL found for act ID {act_id}")
 
