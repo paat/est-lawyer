@@ -135,8 +135,8 @@ def main():
                 title = act_metadata.get('pealkiri', '')
                 document_type = act_metadata.get('liik', '')
                 publication_date = act_metadata.get('avaldamiseKuupaev')
-                entry_into_force_date = act_metadata.get('joustumiseKuupaev')
-                repeal_date = act_metadata.get('kehtivuseLoppKp')
+                entry_into_force_date = act_metadata.get('kehtivus', {}).get('algus')
+                repeal_date = act_metadata.get('kehtivus', {}).get('lopp')
 
                 # Determine status
                 status = determine_document_status(
@@ -147,8 +147,35 @@ def main():
 
                 # Construct source URL
                 document_base_url = os.getenv('RT_DOCUMENT_BASE_URL', 'https://www.riigiteataja.ee')
-                html_url = act_metadata.get('dokumentHtml', '')
-                source_url = f"{document_base_url}{html_url}" if html_url.startswith('/') else html_url
+                html_url_path = act_metadata.get('dokumentHtml') # Try to get 'dokumentHtml' first
+
+                if not html_url_path:
+                    # Fallback: Use globaalID to construct the path if dokumentHtml is not found
+                    globaal_id = act_metadata.get('globaalID')
+                    if globaal_id:
+                        html_url_path = f"/akt/{globaal_id}"
+                    # else:
+                    # Optional further fallback: If 'url' (XML path) is more reliable than globaalID
+                    # and globaalID might be missing. For simplicity, this is commented out for now.
+                    # xml_api_path = act_metadata.get('url')
+                    # if xml_api_path and isinstance(xml_api_path, str) and xml_api_path.endswith('.xml'):
+                    #     html_url_path = xml_api_path[:-4] # Removes .xml
+                    # else:
+                    #     html_url_path = '' # Ensure it's an empty string if no suitable path found
+
+                # Construct the full source_url
+                if html_url_path: # If a path (relative or absolute) was determined
+                    if html_url_path.startswith('http'): # If it's already a full URL
+                         source_url = html_url_path
+                    elif html_url_path.startswith('/'): # If it's an absolute path
+                         source_url = f"{document_base_url}{html_url_path}"
+                    else: # If it's a relative path (less likely for this specific case, but good to handle)
+                         source_url = f"{document_base_url}/{html_url_path}" # Assuming it needs a leading slash
+                else:
+                    # Decide how to handle missing URLs: None or an empty string,
+                    # depending on database schema (NULLABLE or NOT NULL) and preference.
+                    # Using None if the database field allows NULLs is often cleaner.
+                    source_url = None
 
                 # Prepare data for insertion
                 full_text_id = act_metadata.get('terviktekstID')
