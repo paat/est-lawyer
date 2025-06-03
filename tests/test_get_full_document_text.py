@@ -30,26 +30,28 @@ class TestGetFullDocumentText(unittest.TestCase):
 
         # Sample act metadata for testing
         self.sample_act = {
-            'id': '12345',
+            'globaalID': '12345',
             'pealkiri': 'Test Seadus',
-            'dokumentTekst': '/akt/12345/txt',
-            'dokumentHtml': '/akt/12345/html',
-            'dokumentXML': '/akt/12345/xml'
+            'dokumentTekst': 'https://www.riigiteataja.ee/akt/12345/txt',
+            'dokumentHtml': 'https://www.riigiteataja.ee/akt/12345/html',
+            'dokumentXML': 'https://www.riigiteataja.ee/akt/12345/xml'
         }
 
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
     @patch('rt_api_client.time.sleep')
     @patch('rt_api_client.requests.get')
-    def test_fetch_plain_text_success(self, mock_get, mock_sleep):
+    @patch('rt_api_client.os.path.isabs', return_value=True)
+    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    def test_fetch_plain_text_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of plain text content."""
         # Configure the mock to return a successful response with text content
         mock_response1 = MagicMock()
         mock_response1.status_code = 200
-        mock_response1.text = "This is plain text content"
+        mock_response1.content = b"This is plain text content"
 
         mock_response2 = MagicMock()
         mock_response2.status_code = 200
-        mock_response2.text = "This is XML content"
+        mock_response2.content = b"This is XML content"
 
         # Set up side_effect to return different responses for different calls
         mock_get.side_effect = [mock_response1, mock_response2]
@@ -75,30 +77,32 @@ class TestGetFullDocumentText(unittest.TestCase):
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
     @patch('rt_api_client.time.sleep')
     @patch('rt_api_client.requests.get')
-    def test_fetch_html_fallback_success(self, mock_get, mock_sleep):
+    @patch('rt_api_client.os.path.isabs', return_value=True)
+    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    def test_fetch_html_fallback_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of HTML content when plain text is not available."""
         # Configure the mock to fail for plain text but succeed for HTML
         mock_response1 = MagicMock()
         mock_response1.status_code = 404
-        mock_response1.text = "Not Found"
+        mock_response1.content = b"Not Found"
 
         mock_response2 = MagicMock()
         mock_response2.status_code = 200
-        mock_response2.text = "<html>This is HTML content</html>"
+        mock_response2.content = b"<html>This is HTML content</html>"
 
         mock_response3 = MagicMock()
         mock_response3.status_code = 200
-        mock_response3.text = "This is XML content"
+        mock_response3.content = b"This is XML content"
 
         # Set up side_effect to return different responses for different calls
         mock_get.side_effect = [mock_response1, mock_response2, mock_response3]
 
         # Create a test act with only HTML and XML URLs (no plain text)
         act_without_text = {
-            'id': '12345',
+            'globaalID': '12345',
             'pealkiri': 'Test Seadus',
-            'dokumentHtml': '/akt/12345/html',
-            'dokumentXML': '/akt/12345/xml'
+            'dokumentHtml': 'https://www.riigiteataja.ee/akt/12345/html',
+            'dokumentXML': 'https://www.riigiteataja.ee/akt/12345/xml'
         }
 
         # Call the function
@@ -123,12 +127,14 @@ class TestGetFullDocumentText(unittest.TestCase):
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
     @patch('rt_api_client.time.sleep')
     @patch('rt_api_client.requests.get')
-    def test_fetch_xml_success(self, mock_get, mock_sleep):
+    @patch('rt_api_client.os.path.isabs', return_value=True)
+    @patch('rt_api_client.os.path.exists', return_value=False)  # Force it to use HTTP requests
+    def test_fetch_xml_success(self, mock_exists, mock_isabs, mock_get, mock_sleep):
         """Test successful fetching of XML content."""
         # Configure the mock to return a successful response with XML content
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.text = "<xml>This is XML content</xml>"
+        mock_response.content = b"<xml>This is XML content</xml>"
         mock_get.return_value = mock_response
 
         # Call the function
@@ -185,7 +191,8 @@ class TestGetFullDocumentText(unittest.TestCase):
     @patch.dict(os.environ, {'USER_AGENT': 'est-lawyer-data-retriever/0.1 (Non-commercial research project)', 'DEFAULT_REQUEST_DELAY_SECONDS': '0.1'})
     @patch('rt_api_client.time.sleep')
     @patch('rt_api_client.requests.get')
-    def test_absolute_urls(self, mock_get, mock_sleep):
+    @patch('rt_api_client.os.path.isabs', return_value=False)  # Force it to use HTTP requests
+    def test_absolute_urls(self, mock_isabs, mock_get, mock_sleep):
         """Test handling of absolute URLs."""
         # Create an act with absolute URLs
         act_with_absolute_urls = {
@@ -199,7 +206,7 @@ class TestGetFullDocumentText(unittest.TestCase):
         # Configure the mock to return successful responses
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.text = "Content from absolute URL"
+        mock_response.content = b"Content from absolute URL"
         mock_get.return_value = mock_response
 
         # Call the function
