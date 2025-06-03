@@ -182,6 +182,27 @@ python test_get_full_document_text.py
 
 Contributions are welcome! Please feel free to submit issues, fork the repository, and send pull requests.
 
+## Customizing OpenHands Behavior
+
+You can customize the behavior of OpenHands by using microagent markdown files. The microagents are stored in the `.openhands/microagents` directory.
+
+### Directory Structure
+
+```
+.openhands/
+└── microagents/
+    └── repo.md          # General guidelines for the repository
+    └── trigger_database.md  # Microagent triggered by database-related keywords
+    └── trigger_api.md       # Microagent triggered by API-related keywords
+```
+
+### Creating Microagents
+
+To create a new microagent:
+1. Create a new markdown file in the `.openhands/microagents` directory
+2. Add content with instructions and examples related to specific functionality
+3. Use keywords in the filename and content to trigger the microagent
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
